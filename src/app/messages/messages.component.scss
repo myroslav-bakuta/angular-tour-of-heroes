@@ -20,8 +20,6 @@ button.clear {
   padding: 5px 10px;
   border-radius: 4px;
   cursor: pointer;
-  color: #333;
-  margin-bottom: 12px;
 }
 
 button:hover {
@@ -32,4 +30,9 @@ button:disabled {
   background-color: #eee;
   color: #aaa;
   cursor: auto;
+}
+
+button.clear {
+  color: #333;
+  margin-bottom: 12px;
 }
