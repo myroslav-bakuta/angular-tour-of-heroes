@@ -62,7 +62,7 @@ export class HeroService {
       );
   }
 
-  deleteHro(hero: Hero | number): Observable<Hero> {
+  deleteHero(hero: Hero | number): Observable<Hero> {
     const id = typeof hero === 'number' ? hero : hero.id;
     const url = `${this.heroesURL}/${id}`;
 
@@ -70,6 +70,19 @@ export class HeroService {
       .pipe(
         tap(_ => this.log(`deleted hero id=${id}`)),
         catchError(this.handleError<Hero>('deleteHero'))
+      );
+  }
+
+  searchHeroes(term: string): Observable<Hero[]> {
+    if (!term.trim()) {
+      return of([]);
+    }
+    return this.http.get<Hero[]>(`${this.heroesURL}/?name=${term}`)
+      .pipe(
+        tap(x => x.length ?
+            this.log(`found heroes matching "${term}"`)) :
+            this.log(`no heroes matching "${term}"`)),
+        catchError(this.handleError<Hero[]>('searchHeroes', []))
       );
   }
 }
