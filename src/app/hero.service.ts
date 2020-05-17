@@ -13,6 +13,12 @@ export class HeroService {
 
   constructor(private messageService: MessageService, private http: HttpClient) { }
 
+  httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+  };
+
+  private heroesURL = 'api/heroes';
+
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
       console.error(error);
@@ -29,6 +35,19 @@ export class HeroService {
       );
   }
 
+  getHeroNo404<Data>(id: number): Observable<Hero> {
+    const url = `${this.heroesURL}/?id=${id}`;
+    return this.http.get<Hero[]>(url)
+      .pipe(
+        map(heroes => heroes[0]),
+        tap(h => {
+          const outcome = h ? `fetched` : `did not find`;
+          this.log(`${outcome} hero id=${id}`);
+        }),
+        catchError(this.handleError<Hero>(`getHero id=${id}`))
+      );
+  }
+
   getHero(id: number): Observable<Hero> {
     const url = `${this.heroesURL}/${id}`;
     return this.http.get<Hero>(url).pipe(
@@ -40,12 +59,6 @@ export class HeroService {
   private log(message: string) {
     this.messageService.add(`HeroService: ${message}`);
   }
-
-  private heroesURL = 'api/heroes';
-
-  httpOptions = {
-    header: new HttpHeaders({'Content-Type': 'application/json'})
-  };
 
   updateHero(hero: Hero): Observable<any> {
   return this.http.put(this.heroesURL, hero, this.httpOptions).pipe(
@@ -77,12 +90,11 @@ export class HeroService {
     if (!term.trim()) {
       return of([]);
     }
-    return this.http.get<Hero[]>(`${this.heroesURL}/?name=${term}`)
-      .pipe(
-        tap(x => x.length ?
-            this.log(`found heroes matching "${term}"`)) :
-            this.log(`no heroes matching "${term}"`)),
-        catchError(this.handleError<Hero[]>('searchHeroes', []))
-      );
+    return this.http.get<Hero[]>(`${this.heroesURL}/?name=${term}`).pipe(
+      tap(x => x.length ?
+        this.log(`found heroes matching "${term}"`) :
+        this.log(`no heroes matching "${term}"`)),
+      catchError(this.handleError<Hero[]>('searchHeroes', []))
+    );
   }
 }
